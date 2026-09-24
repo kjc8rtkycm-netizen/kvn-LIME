@@ -1,0 +1,1180 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#ecfccb">
+<title>КВН ЛАЙМ</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<script src="https://www.gstatic.com/firebasejs/11.0.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/11.0.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/11.0.0/firebase-database-compat.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit}
+input,textarea,select{-webkit-user-select:text;user-select:text;font-family:inherit}
+html,body{height:100%;overflow:hidden;width:100%}
+
+:root{
+  --bg:#f7fee7;
+  --card:#ffffff;
+  --line:#d9f99d;
+  --line2:#bef264;
+  --txt:#1a2e05;
+  --txt2:#3f6212;
+  --txt3:#84cc16;
+  --lime:#a3e635;
+  --lime2:#84cc16;
+  --lime3:#65a30d;
+  --lime-dark:#4d7c0f;
+  --shadow:0 8px 24px rgba(101,163,13,.15);
+  --shadow-lg:0 16px 40px rgba(101,163,13,.20);
+  --shadow-sm:0 4px 12px rgba(101,163,13,.10);
+  --red:#dc2626;
+  --amber:#d97706;
+  --sky:#0891b2;
+  --purple:#7c3aed;
+  --pink:#db2777;
+}
+
+body{
+  font-family:'Inter','SF Pro Display',system-ui,sans-serif;
+  color:var(--txt);
+  background:var(--bg);
+  background-image:
+    radial-gradient(circle at 15% 10%,rgba(163,230,53,.35),transparent 45%),
+    radial-gradient(circle at 85% 15%,rgba(190,242,100,.30),transparent 45%),
+    radial-gradient(circle at 70% 90%,rgba(132,204,22,.22),transparent 50%),
+    radial-gradient(circle at 10% 85%,rgba(217,249,157,.30),transparent 45%);
+  background-attachment:fixed;
+  display:flex;justify-content:center;align-items:center;
+  -webkit-font-smoothing:antialiased;
+}
+
+@keyframes su{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+@keyframes pop{0%{transform:scale(.85);opacity:0}100%{transform:scale(1);opacity:1}}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.6;transform:scale(1.15)}}
+@keyframes slideDown{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:translateY(0)}}
+@keyframes sp{to{transform:rotate(360deg)}}
+@keyframes confettiFall{0%{transform:translateY(-20px) rotate(0);opacity:1}100%{transform:translateY(110vh) rotate(720deg);opacity:0}}
+@keyframes skeleton{0%{background-position:-200% 0}100%{background-position:200% 0}}
+@keyframes shine{0%{background-position:-200% 0}100%{background-position:200% 0}}
+
+#app{
+  width:100%;height:100vh;height:100dvh;max-width:520px;
+  background:linear-gradient(180deg,#ffffff,#f7fee7);
+  display:flex;flex-direction:column;position:relative;overflow:hidden;
+  border-left:1px solid var(--line);
+  border-right:1px solid var(--line);
+  box-shadow:var(--shadow-lg);
+}
+
+/* HEADER */
+.hd{
+  display:flex;align-items:center;gap:10px;
+  padding:12px 14px;
+  padding-top:calc(12px + env(safe-area-inset-top,0px));
+  background:linear-gradient(135deg,#ffffff,#ecfccb);
+  border-bottom:1px solid var(--line);
+  flex-shrink:0;position:relative;z-index:40;
+  animation:slideDown .3s ease;
+}
+.hd .logo{
+  width:44px;height:44px;border-radius:13px;
+  background:linear-gradient(135deg,#ecfccb,#bef264);
+  border:1px solid var(--line2);
+  display:flex;align-items:center;justify-content:center;
+  overflow:hidden;flex-shrink:0;cursor:pointer;
+  box-shadow:0 4px 14px rgba(101,163,13,.25);
+  transition:transform .15s ease;
+}
+.hd .logo:active{transform:scale(.9) rotate(10deg)}
+.hd .logo img{width:100%;height:100%;object-fit:cover}
+.hd .tinfo{flex:1;min-width:0}
+.hd .tname{
+  font-size:17px;font-weight:900;line-height:1.1;letter-spacing:-.3px;
+  background:linear-gradient(135deg,#4d7c0f,#65a30d,#84cc16);
+  -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;
+}
+.hd .tsub{font-size:9px;color:var(--txt3);font-weight:700;margin-top:2px}
+.hd .tact{display:flex;gap:6px}
+.tbtn{
+  width:38px;height:38px;border-radius:11px;
+  background:#ecfccb;border:1px solid var(--line2);
+  color:var(--lime-dark);font-size:15px;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  transition:transform .15s,background .2s;position:relative;
+}
+.tbtn:active{transform:scale(.88);background:#d9f99d}
+
+/* TABS */
+.tabs{
+  display:flex;padding:6px 8px;gap:3px;
+  background:#ffffff;
+  border-bottom:1px solid var(--line);
+  flex-shrink:0;overflow-x:auto;scrollbar-width:none;
+}
+.tabs::-webkit-scrollbar{display:none}
+.tab{
+  flex:1;min-width:56px;padding:7px 4px;border-radius:11px;
+  color:var(--txt3);font-size:8.5px;font-weight:800;
+  cursor:pointer;font-family:inherit;
+  display:flex;flex-direction:column;align-items:center;gap:2px;
+  transition:all .2s cubic-bezier(.34,1.4,.64,1);position:relative;
+}
+.tab .ti{font-size:18px;transition:transform .2s ease,color .2s}
+.tab:active .ti{transform:scale(.85)}
+.tab.on{background:#ecfccb;color:var(--lime-dark);border:1px solid var(--line2)}
+.tab.on .ti{color:var(--lime-dark)}
+
+/* VIEWS */
+.vw{flex:1;display:none;flex-direction:column;overflow:hidden;position:relative}
+.vw.on{display:flex;animation:su .25s ease}
+.ls{flex:1;overflow-y:auto;padding:14px;padding-bottom:20px;-webkit-overflow-scrolling:touch}
+.ls::-webkit-scrollbar{width:0}
+
+.section-title{font-size:11px;font-weight:900;color:var(--txt3);text-transform:uppercase;letter-spacing:1px;margin:0 0 10px;display:flex;align-items:center;gap:6px}
+.section-title::before{content:'';width:4px;height:4px;border-radius:50%;background:var(--lime2)}
+
+/* HERO */
+.hero{
+  background:linear-gradient(135deg,#ecfccb,#d9f99d);
+  border:1px solid var(--line2);
+  border-radius:20px;padding:20px;text-align:center;
+  margin-bottom:16px;
+  box-shadow:var(--shadow);
+}
+.hero .h-logo{width:90px;height:90px;border-radius:24px;margin:0 auto 14px;overflow:hidden;box-shadow:0 8px 22px rgba(101,163,13,.3)}
+.hero .h-logo img{width:100%;height:100%;object-fit:cover}
+.hero h1{font-size:22px;font-weight:900;color:var(--txt);margin-bottom:6px}
+.hero p{font-size:13px;color:var(--txt2);line-height:1.5}
+.hero .h-stats{display:flex;justify-content:center;gap:14px;margin-top:14px}
+.hero .h-stat{text-align:center}
+.hero .h-stat .n{font-size:20px;font-weight:900;color:var(--lime3)}
+.hero .h-stat .l{font-size:9px;color:var(--txt3);text-transform:uppercase;font-weight:800;margin-top:2px}
+
+/* CARDS */
+.card{
+  background:#fff;border:1px solid var(--line);
+  border-radius:16px;padding:14px;margin-bottom:10px;
+  box-shadow:var(--shadow-sm);
+  animation:su .3s ease both;
+}
+.card .c-title{font-size:14px;font-weight:900;color:var(--txt);margin-bottom:6px;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.card .c-text{font-size:12.5px;color:var(--txt2);line-height:1.5;word-break:break-word}
+.card .c-meta{font-size:10px;color:var(--txt3);margin-top:8px;display:flex;gap:10px;flex-wrap:wrap;font-weight:700}
+.card .c-actions{display:flex;gap:6px;margin-top:10px;padding-top:10px;border-top:1px solid var(--line)}
+.card .c-actions button{padding:6px 10px;border-radius:9px;font-size:11px;font-weight:800;cursor:pointer;display:flex;align-items:center;gap:4px;transition:transform .15s}
+.card .c-actions button:active{transform:scale(.92)}
+.btn-like{background:rgba(220,38,38,.08);color:var(--red);border:1px solid rgba(220,38,38,.25)}
+.btn-like.on{background:rgba(220,38,38,.20)}
+.btn-comment{background:rgba(8,145,178,.08);color:var(--sky);border:1px solid rgba(8,145,178,.25)}
+.btn-delete{background:rgba(220,38,38,.08);color:var(--red);border:1px solid rgba(220,38,38,.25)}
+.btn-delete:active{background:rgba(220,38,38,.20)}
+
+/* BADGES */
+.badge{font-size:9px;padding:3px 8px;border-radius:6px;font-weight:900;text-transform:uppercase;letter-spacing:.3px;white-space:nowrap}
+.bdg-role-guest{background:rgba(132,204,22,.12);color:var(--txt2);border:1px solid rgba(132,204,22,.4)}
+.bdg-role-member{background:rgba(8,145,178,.12);color:var(--sky);border:1px solid rgba(8,145,178,.4)}
+.bdg-role-commander{background:linear-gradient(135deg,#fbbf24,#d97706);color:#fff;border:1px solid #fcd34d}
+.bdg-tag{background:rgba(132,204,22,.12);color:var(--lime-dark);border:1px solid var(--line2)}
+
+/* INPUTS */
+.fld{margin-bottom:13px}
+.fld label{font-size:10.5px;color:var(--txt3);display:block;margin-bottom:6px;font-weight:800;text-transform:uppercase;letter-spacing:.5px}
+.fld input,.fld textarea,.fld select{
+  width:100%;padding:12px 14px;border-radius:12px;
+  border:1px solid var(--line);background:#fbfff4;
+  color:var(--txt);font-size:13.5px;outline:none;
+  transition:border .2s,box-shadow .2s;
+}
+.fld input:focus,.fld textarea:focus,.fld select:focus{border-color:var(--lime2);box-shadow:0 0 0 3px rgba(132,204,22,.18);background:#fff}
+.fld textarea{min-height:70px;resize:vertical}
+.fld select option{background:#fff;color:var(--txt)}
+
+/* BUTTONS */
+.btn{
+  width:100%;padding:13px;border:none;border-radius:13px;
+  background:linear-gradient(135deg,#a3e635,#65a30d);
+  color:#fff;font-weight:900;font-size:14px;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  margin-bottom:9px;
+  box-shadow:0 6px 18px rgba(101,163,13,.35);
+  transition:transform .15s;
+}
+.btn:active{transform:scale(.96)}
+.btn-ghost{background:#fbfff4;color:var(--lime3);border:1.5px solid var(--lime2);box-shadow:none}
+.btn-danger{background:linear-gradient(135deg,#f87171,#dc2626);box-shadow:0 6px 18px rgba(220,38,38,.3)}
+
+/* FAB */
+.fab{
+  position:absolute;bottom:20px;right:20px;
+  width:58px;height:58px;border-radius:20px;
+  background:linear-gradient(135deg,#a3e635,#65a30d);
+  color:#fff;font-size:24px;cursor:pointer;
+  box-shadow:0 12px 28px rgba(101,163,13,.5);
+  display:flex;align-items:center;justify-content:center;z-index:30;
+  transition:transform .2s ease;
+}
+.fab:active{transform:scale(.88) rotate(90deg)}
+
+/* EMPTY */
+.em{text-align:center;padding:50px 20px;color:var(--txt3)}
+.em .ic{font-size:56px;margin-bottom:14px;opacity:.5}
+.em .t{font-size:17px;font-weight:900;color:var(--txt);margin-bottom:6px}
+.em .d{font-size:12.5px}
+
+/* SKELETON */
+.skel{background:linear-gradient(90deg,#ecfccb 0%,#f7fee7 50%,#ecfccb 100%);background-size:200% 100%;animation:skeleton 1.4s infinite;border-radius:14px;height:60px;margin-bottom:8px}
+
+/* MODAL */
+.mo{
+  display:none;position:fixed;inset:0;
+  background:rgba(26,46,5,.45);
+  backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);
+  z-index:9999;justify-content:center;align-items:center;
+  padding:16px;overflow-y:auto;
+}
+.mo.active{display:flex;animation:pop .25s cubic-bezier(.34,1.4,.64,1)}
+.mbox{
+  background:#fff;border-radius:22px;padding:22px;
+  max-width:440px;width:100%;max-height:90vh;overflow-y:auto;
+  box-shadow:0 30px 70px rgba(26,46,5,.3);
+  border:1px solid var(--line2);position:relative;
+  animation:pop .3s cubic-bezier(.34,1.4,.64,1);
+}
+.mbox h3{font-size:17px;font-weight:900;margin-bottom:16px;color:var(--txt);display:flex;align-items:center;gap:10px}
+.mbox h3 i{color:var(--lime3)}
+.mclose{
+  position:absolute;top:14px;right:14px;width:32px;height:32px;
+  border-radius:50%;background:#ecfccb;border:1px solid var(--line2);
+  color:var(--lime-dark);font-size:14px;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  transition:transform .15s;
+}
+.mclose:active{transform:scale(.85)}
+
+/* TOAST */
+.toasts{position:fixed;top:calc(70px + env(safe-area-inset-top,0px));left:50%;transform:translateX(-50%);z-index:10000;display:flex;flex-direction:column;gap:8px;pointer-events:none;width:calc(100% - 32px);max-width:400px}
+.tst{
+  background:#fff;color:var(--txt);border:1px solid var(--line2);
+  border-radius:12px;padding:12px 16px;font-size:13px;font-weight:700;
+  display:flex;align-items:center;gap:10px;
+  box-shadow:0 10px 30px rgba(101,163,13,.25);
+  animation:su .3s cubic-bezier(.34,1.4,.64,1);
+  overflow:hidden;position:relative;
+}
+.tst i{color:var(--lime3);font-size:15px;flex-shrink:0}
+.tst .pb{position:absolute;bottom:0;left:0;height:2px;background:linear-gradient(90deg,var(--lime),var(--lime3));animation:tstBar 2.5s linear forwards}
+@keyframes tstBar{from{width:100%}to{width:0}}
+
+/* TRACK PLAYER */
+.track-card{
+  background:#fff;border:1px solid var(--line);
+  border-radius:16px;padding:14px;margin-bottom:10px;
+  box-shadow:var(--shadow-sm);
+  animation:su .3s ease both;
+}
+.track-card .t-header{display:flex;gap:10px;align-items:flex-start;margin-bottom:10px}
+.track-card .t-icon{
+  width:44px;height:44px;border-radius:12px;
+  background:linear-gradient(135deg,#ecfccb,#bef264);
+  display:flex;align-items:center;justify-content:center;
+  font-size:22px;flex-shrink:0;
+}
+.track-card .t-info{flex:1;min-width:0}
+.track-card .t-name{font-size:14px;font-weight:900;color:var(--txt);margin-bottom:3px}
+.track-card .t-author{font-size:10.5px;color:var(--txt3);font-weight:700}
+.track-card .t-tags{display:flex;gap:4px;flex-wrap:wrap;margin-top:6px}
+.track-card audio{width:100%;margin-top:8px}
+.track-card .t-actions{display:flex;gap:6px;margin-top:10px;padding-top:10px;border-top:1px solid var(--line)}
+.track-card .t-actions button{padding:6px 10px;border-radius:9px;font-size:11px;font-weight:800;cursor:pointer;display:flex;align-items:center;gap:4px;transition:transform .15s}
+.track-card .t-actions button:active{transform:scale(.92)}
+
+/* INPUT LINK BOX */
+.link-box{
+  display:flex;gap:8px;
+  background:#fbfff4;border:1px solid var(--line);
+  border-radius:12px;padding:8px;margin-bottom:10px;
+}
+.link-box input{flex:1;border:none;background:transparent;padding:8px 10px;font-size:13px;outline:none;color:var(--txt)}
+.link-box button{padding:8px 14px;border-radius:9px;background:linear-gradient(135deg,#a3e635,#65a30d);color:#fff;font-weight:900;font-size:12px;cursor:pointer}
+.link-box button:active{transform:scale(.94)}
+
+/* UPLOAD PROGRESS */
+.upload-bar{
+  height:6px;background:#ecfccb;border-radius:3px;overflow:hidden;margin-top:8px;display:none;
+}
+.upload-bar.show{display:block}
+.upload-bar .fill{height:100%;background:linear-gradient(90deg,#a3e635,#65a30d);width:0%;transition:width .3s;border-radius:3px}
+
+/* PROFILE */
+.pf-hero{text-align:center;padding:16px 0 20px}
+.pf-av{
+  width:110px;height:110px;border-radius:50%;
+  background:linear-gradient(135deg,#a3e635,#65a30d);
+  display:flex;align-items:center;justify-content:center;
+  font-size:44px;font-weight:900;color:#fff;margin:0 auto 14px;
+  overflow:hidden;position:relative;
+  box-shadow:0 10px 30px rgba(101,163,13,.35);
+  cursor:pointer;transition:transform .2s ease;
+}
+.pf-av:active{transform:scale(.95)}
+.pf-av img{width:100%;height:100%;object-fit:cover}
+.pf-row{display:flex;align-items:center;gap:14px;padding:14px 16px;cursor:pointer;border-bottom:1px solid var(--line);transition:background .15s}
+.pf-row:active{background:#fbfff4}
+.pf-row:last-child{border-bottom:none}
+.pf-row .ic{width:38px;height:38px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;background:#ecfccb;color:var(--lime-dark);border:1px solid var(--line2)}
+.pf-row .inf{flex:1;min-width:0}
+.pf-row .inf .t{font-size:13.5px;font-weight:900;color:var(--txt)}
+.pf-row .inf .s{font-size:11px;color:var(--txt3);margin-top:2px}
+.card-block{background:#fff;border:1px solid var(--line);border-radius:16px;margin-bottom:12px;overflow:hidden;box-shadow:var(--shadow-sm)}
+
+/* MEMBER ROW */
+.mem-row{
+  display:flex;gap:10px;align-items:center;
+  padding:12px;margin-bottom:7px;
+  background:#fff;border:1px solid var(--line);
+  border-radius:14px;box-shadow:var(--shadow-sm);
+}
+.mem-row .mav{
+  width:44px;height:44px;border-radius:50%;
+  background:linear-gradient(135deg,#a3e635,#65a30d);
+  display:flex;align-items:center;justify-content:center;
+  color:#fff;font-weight:900;font-size:16px;
+  overflow:hidden;flex-shrink:0;position:relative;
+}
+.mem-row .mav img{width:100%;height:100%;object-fit:cover}
+.mem-row .mav .dot{position:absolute;bottom:1px;right:1px;width:11px;height:11px;border-radius:50%;background:#22c55e;border:2px solid #fff}
+.mem-row .minf{flex:1;min-width:0}
+.mem-row .minf .mn{font-size:13.5px;font-weight:900;color:var(--txt)}
+.mem-row .minf .ms{font-size:11px;color:var(--txt3);margin-top:2px}
+.mem-row .mbdg .badge{font-size:9px}
+
+/* SHOW ROW */
+.show-row{
+  background:#fff;border:1px solid var(--line);
+  border-radius:14px;padding:12px;margin-bottom:10px;
+  box-shadow:var(--shadow-sm);
+  display:flex;gap:12px;align-items:center;
+}
+.show-date{
+  width:56px;height:56px;border-radius:14px;
+  background:linear-gradient(135deg,#a3e635,#65a30d);
+  color:#fff;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  flex-shrink:0;font-weight:900;
+}
+.show-date .d{font-size:20px;line-height:1}
+.show-date .m{font-size:9px;text-transform:uppercase;letter-spacing:.5px;margin-top:2px}
+.show-info{flex:1;min-width:0}
+.show-info .sn{font-size:14px;font-weight:900;color:var(--txt);margin-bottom:4px}
+.show-info .sp{font-size:11.5px;color:var(--txt2);margin-bottom:3px;display:flex;align-items:center;gap:5px}
+.show-info .st{font-size:11px;color:var(--txt3);line-height:1.4}
+
+/* COMMENTS */
+.comment{display:flex;gap:10px;padding:10px 0;border-bottom:1px solid var(--line)}
+.comment:last-child{border-bottom:none}
+.comment .cav{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#a3e635,#65a30d);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:900;font-size:13px;flex-shrink:0;overflow:hidden}
+.comment .cav img{width:100%;height:100%;object-fit:cover}
+.comment .cbody{flex:1;min-width:0}
+.comment .cname{font-size:11.5px;color:var(--lime-dark);font-weight:900;margin-bottom:3px}
+.comment .ctext{font-size:12.5px;color:var(--txt);line-height:1.4;word-break:break-word}
+.comment .ctime{font-size:9px;color:var(--txt3);margin-top:3px}
+
+/* SPINNER */
+.spin{display:inline-block;width:14px;height:14px;border:2px solid rgba(101,163,13,.25);border-top-color:var(--lime3);border-radius:50%;animation:sp 1s linear infinite}
+.hint{font-size:11px;color:var(--txt3);text-align:center;line-height:1.5;padding:8px}
+
+/* CONFETTI */
+.confetti-piece{position:fixed;width:10px;height:10px;top:-20px;z-index:10004;pointer-events:none;border-radius:2px}
+
+@media(min-width:900px){
+  #app{height:calc(100vh - 40px);border-radius:24px;border:1px solid var(--line2)}
+}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+</style>
+</head>
+<body>
+<div id="app">
+
+<!-- HEADER -->
+<div class="hd">
+  <div class="logo" onclick="switchTab('home')"><img src="IMG_5964.jpeg" alt="Лого"></div>
+  <div class="tinfo">
+    <div class="tname">КВН ЛАЙМ</div>
+    <div class="tsub">отбивки • идеи • команда</div>
+  </div>
+  <div class="tact">
+    <button class="tbtn" id="adminBtn" onclick="openAdminModal()"><i class="fas fa-key"></i></button>
+  </div>
+</div>
+
+<!-- TABS -->
+<div class="tabs">
+  <button class="tab on" data-tab="home" onclick="switchTab('home')"><i class="fas fa-house ti"></i><span>Главная</span></button>
+  <button class="tab" data-tab="tracks" onclick="switchTab('tracks')"><i class="fas fa-music ti"></i><span>Отбивки</span></button>
+  <button class="tab" data-tab="ideas" onclick="switchTab('ideas')"><i class="fas fa-lightbulb ti"></i><span>Идеи</span></button>
+  <button class="tab" data-tab="team" onclick="switchTab('team')"><i class="fas fa-users ti"></i><span>Команда</span></button>
+  <button class="tab" data-tab="shows" onclick="switchTab('shows')"><i class="fas fa-calendar ti"></i><span>Афиша</span></button>
+  <button class="tab" data-tab="profile" onclick="switchTab('profile')"><i class="fas fa-user ti"></i><span>Я</span></button>
+</div>
+
+<!-- HOME -->
+<div class="vw on" id="vwHome">
+  <div class="ls">
+    <div class="hero">
+      <div class="h-logo"><img src="IMG_5964.jpeg" alt="Лого"></div>
+      <h1>КВН ЛАЙМ</h1>
+      <p>Отбивки, идеи и команда в одном месте</p>
+      <div class="h-stats">
+        <div class="h-stat"><div class="n" id="hTracks">0</div><div class="l">Треков</div></div>
+        <div class="h-stat"><div class="n" id="hIdeas">0</div><div class="l">Идей</div></div>
+        <div class="h-stat"><div class="n" id="hMembers">0</div><div class="l">Участников</div></div>
+      </div>
+    </div>
+
+    <div class="section-title">Ближайшее выступление</div>
+    <div id="homeShow"></div>
+
+    <div class="section-title">Свежие идеи</div>
+    <div id="homeIdeas"></div>
+
+    <div class="section-title">Новые отбивки</div>
+    <div id="homeTracks"></div>
+  </div>
+</div>
+
+<!-- TRACKS -->
+<div class="vw" id="vwTracks">
+  <div class="ls">
+    <div id="uploadBlock" style="display:none">
+      <div class="link-box">
+        <input type="text" id="trackLink" placeholder="Вставить ссылку на аудио..." autocomplete="off">
+        <button onclick="openTrackModal()"><i class="fas fa-plus"></i> Файл</button>
+      </div>
+    </div>
+    <div class="section-title"><span id="tracksCount">Отбивки</span></div>
+    <div id="tracksList"></div>
+  </div>
+  <button class="fab" id="fabAddTrack" onclick="openTrackModal()" style="display:none"><i class="fas fa-plus"></i></button>
+</div>
+
+<!-- IDEAS -->
+<div class="vw" id="vwIdeas">
+  <div class="ls">
+    <button class="btn" id="ideaAddBtn" onclick="openIdeaModal()" style="display:none"><i class="fas fa-lightbulb"></i> Добавить идею</button>
+    <div class="section-title">Доска идей</div>
+    <div id="ideasList"></div>
+  </div>
+</div>
+
+<!-- TEAM -->
+<div class="vw" id="vwTeam">
+  <div class="ls">
+    <div class="section-title">Состав команды</div>
+    <div id="teamList"></div>
+  </div>
+</div>
+
+<!-- SHOWS -->
+<div class="vw" id="vwShows">
+  <div class="ls">
+    <button class="btn" id="showAddBtn" onclick="openShowModal()" style="display:none"><i class="fas fa-plus"></i> Добавить выступление</button>
+    <div class="section-title">Афиша</div>
+    <div id="showsList"></div>
+  </div>
+</div>
+
+<!-- PROFILE -->
+<div class="vw" id="vwProfile">
+  <div class="ls">
+    <div id="profileNotAuth" style="padding:40px 20px;text-align:center">
+      <div style="font-size:60px;margin-bottom:16px">🔒</div>
+      <div style="font-size:18px;font-weight:900;color:var(--txt);margin-bottom:8px">Войдите в аккаунт</div>
+      <div class="hint" style="margin-bottom:20px">Отдельная регистрация для КВН ЛАЙМ</div>
+      <button class="btn" style="max-width:280px;margin:0 auto" onclick="openModal('authOverlay')"><i class="fas fa-right-to-bracket"></i> Войти / Регистрация</button>
+    </div>
+    <div id="profileAuth" style="display:none">
+      <div class="pf-hero">
+        <div class="pf-av" id="pfAvatar" onclick="document.getElementById('avatarFileInput').click()">
+          <span id="pfLetter">?</span>
+        </div>
+        <div style="font-size:20px;font-weight:900;color:var(--txt);margin-bottom:4px" id="pfName">Ник</div>
+        <div style="font-size:12px;color:var(--txt3);font-weight:800;margin-bottom:8px" id="pfHandle">@nick</div>
+        <div id="pfRoleBadge" style="margin-bottom:10px"></div>
+        <div style="font-size:12.5px;color:var(--txt2);line-height:1.5;padding:0 16px" id="pfBio"></div>
+      </div>
+      <div class="card-block">
+        <div class="pf-row" onclick="openEditProfile()"><div class="ic"><i class="fas fa-user-pen"></i></div><div class="inf"><div class="t">Редактировать профиль</div><div class="s">Имя, био, аватар</div></div><div style="color:var(--txt3)">›</div></div>
+        <div class="pf-row" onclick="copyMyNick()"><div class="ic"><i class="fas fa-at"></i></div><div class="inf"><div class="t">Мой ник</div><div class="s" id="pfNickSub">@nick</div></div><div style="color:var(--txt3)"><i class="fas fa-copy" style="font-size:11px"></i></div></div>
+        <div class="pf-row" onclick="openModal('changePassOverlay')"><div class="ic"><i class="fas fa-key"></i></div><div class="inf"><div class="t">Сменить пароль</div><div class="s">Старый и новый</div></div><div style="color:var(--txt3)">›</div></div>
+      </div>
+      <div class="card-block" id="commanderBlock" style="display:none">
+        <div class="pf-row" onclick="openInviteModal()"><div class="ic" style="background:rgba(217,119,6,.10);color:var(--amber);border-color:rgba(217,119,6,.4)"><i class="fas fa-crown"></i></div><div class="inf"><div class="t">Приглашения команды</div><div class="s">Коды для новых участников</div></div><div style="color:var(--txt3)">›</div></div>
+        <div class="pf-row" onclick="clearAllTracks()"><div class="ic" style="background:rgba(220,38,38,.10);color:var(--red);border-color:rgba(220,38,38,.4)"><i class="fas fa-broom"></i></div><div class="inf"><div class="t" style="color:var(--red)">Очистить все отбивки</div><div class="s">Удалить все треки команды</div></div></div>
+      </div>
+      <div class="card-block">
+        <div class="pf-row" onclick="logout()"><div class="ic" style="background:rgba(220,38,38,.10);color:var(--red);border-color:rgba(220,38,38,.4)"><i class="fas fa-right-from-bracket"></i></div><div class="inf"><div class="t" style="color:var(--red)">Выйти</div><div class="s">Завершить сессию</div></div></div>
+      </div>
+      <div class="hint" style="padding:12px 0 30px;opacity:.7">КВН ЛАЙМ · лайм — хорошая квн команда</div>
+    </div>
+  </div>
+</div>
+</div>
+
+<input type="file" id="trackFileInput" accept="audio/*" style="display:none">
+<input type="file" id="avatarFileInput" accept="image/*" style="display:none">
+
+<!-- MODALS -->
+<div class="mo" id="authOverlay">
+  <div class="mbox">
+    <button class="mclose" onclick="closeModal('authOverlay')">✕</button>
+    <h3><i class="fas fa-right-to-bracket"></i> Вход / Регистрация</h3>
+    <div class="hint" style="margin-bottom:10px">КВН ЛАЙМ · отдельный аккаунт</div>
+    <div class="fld"><label>Ник</label><input id="authNick" placeholder="nickname" maxlength="20" autocomplete="username"></div>
+    <div class="fld"><label>Пароль</label><input type="password" id="authPass" placeholder="••••••••" autocomplete="current-password"></div>
+    <div class="fld" id="inviteField"><label>Инвайт-код <span style="text-transform:none;color:var(--txt3);font-weight:600">(если есть)</span></label><input id="authInvite" placeholder="KVN-LIME..." autocomplete="off"></div>
+    <div id="authErr" style="display:none;font-size:12px;color:var(--red);text-align:center;padding:8px;background:rgba(220,38,38,.08);border-radius:10px;margin-bottom:10px"></div>
+    <button class="btn" onclick="doAuth()"><i class="fas fa-sign-in-alt"></i> Войти / Создать</button>
+    <div style="font-size:11px;color:var(--txt3);text-align:center;line-height:1.5;margin-top:8px">Без инвайт-кода вы зайдёте как <b>Гость</b> — только просмотр.</div>
+  </div>
+</div>
+
+<div class="mo" id="adminOverlay">
+  <div class="mbox" style="max-width:360px">
+    <button class="mclose" onclick="closeModal('adminOverlay')">✕</button>
+    <h3><i class="fas fa-key"></i> Мастер-доступ</h3>
+    <div class="hint" style="margin-bottom:10px">Введите мастер-пароль командира чтобы получить права командира на этом аккаунте.</div>
+    <div class="fld"><label>Мастер-пароль</label><input type="password" id="adminPass" placeholder="••••••••"></div>
+    <div id="adminErr" style="display:none;font-size:12px;color:var(--red);text-align:center;padding:8px;background:rgba(220,38,38,.08);border-radius:10px;margin-bottom:10px"></div>
+    <button class="btn" onclick="tryAdmin()">Стать командиром</button>
+  </div>
+</div>
+
+<div class="mo" id="trackOverlay">
+  <div class="mbox">
+    <button class="mclose" onclick="closeModal('trackOverlay')">✕</button>
+    <h3><i class="fas fa-music"></i> Добавить отбивку</h3>
+    <div class="fld"><label>Название</label><input id="trName" placeholder="Отбивка на выход..."></div>
+    <div class="fld"><label>Теги</label><input id="trTags" placeholder="сцена, минус, фонограмма" ></div>
+    <div class="fld"><label>Описание</label><textarea id="trDesc" placeholder="Для какого номера, детали..."></textarea></div>
+    <div style="display:flex;gap:8px;margin-bottom:13px">
+      <button class="btn btn-ghost" style="margin:0;flex:1" onclick="document.getElementById('trackFileInput').click()"><i class="fas fa-upload"></i> Файл до 200 МБ</button>
+    </div>
+    <div class="link-box">
+      <input type="text" id="trLink" placeholder="Или вставь ссылку...">
+    </div>
+    <div id="uploadStatus" style="font-size:11px;color:var(--txt3);margin-bottom:8px"></div>
+    <div class="upload-bar" id="uploadBar"><div class="fill" id="uploadFill"></div></div>
+    <button class="btn" style="margin-top:12px" onclick="saveTrack()"><i class="fas fa-check"></i> Сохранить</button>
+    <div class="hint">Максимум 200 МБ на файл. Большие треки — вставляйте ссылку на Google Drive.</div>
+  </div>
+</div>
+
+<div class="mo" id="ideaOverlay">
+  <div class="mbox">
+    <button class="mclose" onclick="closeModal('ideaOverlay')">✕</button>
+    <h3><i class="fas fa-lightbulb"></i> Новая идея</h3>
+    <div class="fld"><label>Заголовок</label><input id="idTitle" placeholder="Идея номера..."></div>
+    <div class="fld"><label>Описание</label><textarea id="idText" placeholder="Опиши идею подробно..." style="min-height:120px"></textarea></div>
+    <button class="btn" onclick="saveIdea()"><i class="fas fa-check"></i> Сохранить</button>
+  </div>
+</div>
+
+<div class="mo" id="showOverlay">
+  <div class="mbox">
+    <button class="mclose" onclick="closeModal('showOverlay')">✕</button>
+    <h3><i class="fas fa-calendar"></i> Новое выступление</h3>
+    <div class="fld"><label>Название</label><input id="shName" placeholder="Игра 1/4 финала..."></div>
+    <div class="fld"><label>Дата</label><input type="date" id="shDate"></div>
+    <div class="fld"><label>Место</label><input id="shPlace" placeholder="ДК, адрес..."></div>
+    <div class="fld"><label>Описание</label><textarea id="shDesc" placeholder="Что играем, детали..."></textarea></div>
+    <button class="btn" onclick="saveShow()"><i class="fas fa-check"></i> Сохранить</button>
+  </div>
+</div>
+
+<div class="mo" id="editProfileOverlay">
+  <div class="mbox">
+    <button class="mclose" onclick="closeModal('editProfileOverlay')">✕</button>
+    <h3><i class="fas fa-user-pen"></i> Профиль</h3>
+    <div class="fld"><label>Имя</label><input id="edName" maxlength="30"></div>
+    <div class="fld"><label>Bio</label><textarea id="edBio" maxlength="200"></textarea></div>
+    <div class="fld"><label>Аватар (URL)</label><input id="edAvatar" placeholder="https://..."></div>
+    <button class="btn btn-ghost" style="margin-bottom:9px" onclick="document.getElementById('avatarFileInput').click()"><i class="fas fa-upload"></i> Загрузить с телефона</button>
+    <button class="btn" onclick="saveProfile()">Сохранить</button>
+  </div>
+</div>
+
+<div class="mo" id="changePassOverlay">
+  <div class="mbox">
+    <button class="mclose" onclick="closeModal('changePassOverlay')">✕</button>
+    <h3><i class="fas fa-key"></i> Смена пароля</h3>
+    <div class="fld"><label>Старый пароль</label><input type="password" id="passOld"></div>
+    <div class="fld"><label>Новый пароль</label><input type="password" id="passNew"></div>
+    <div id="passErr" style="display:none;font-size:12px;color:var(--red);text-align:center;padding:8px;background:rgba(220,38,38,.08);border-radius:10px;margin-bottom:10px"></div>
+    <button class="btn" onclick="doChangePassword()">Сменить</button>
+  </div>
+</div>
+
+<div class="mo" id="commentsOverlay">
+  <div class="mbox">
+    <button class="mclose" onclick="closeModal('commentsOverlay')">✕</button>
+    <h3><i class="fas fa-comment"></i> Комментарии</h3>
+    <div id="commentsList"></div>
+    <div class="link-box" style="margin-top:12px">
+      <input type="text" id="commentInput" placeholder="Написать...">
+      <button onclick="sendComment()"><i class="fas fa-paper-plane"></i></button>
+    </div>
+  </div>
+</div>
+
+<div class="mo" id="inviteOverlay">
+  <div class="mbox">
+    <button class="mclose" onclick="closeModal('inviteOverlay')">✕</button>
+    <h3><i class="fas fa-crown"></i> Приглашения</h3>
+    <div class="fld"><label>Инвайт-код для участников</label>
+      <div class="link-box"><input type="text" value="KVN-LIME164₽@" readonly id="inviteMember"><button onclick="copyText(document.getElementById('inviteMember').value)"><i class="fas fa-copy"></i></button></div>
+    </div>
+    <div class="fld"><label>Мастер-пароль командира</label>
+      <div class="link-box"><input type="text" value="KVNSHIKPROLIMEKOMANDIR0273₽&" readonly id="inviteMaster"><button onclick="copyText(document.getElementById('inviteMaster').value)"><i class="fas fa-copy"></i></button></div>
+    </div>
+    <div class="hint">⚠️ Мастер-пароль даёт полный доступ к удалению любого контента. Делитесь только с командирами.</div>
+  </div>
+</div>
+
+<div class="mo" id="confirmOverlay">
+  <div class="mbox" style="text-align:center;max-width:360px">
+    <h3 style="justify-content:center"><i class="fas fa-triangle-exclamation" style="color:var(--red)"></i> Подтверждение</h3>
+    <div id="confirmTitle" style="font-size:15px;font-weight:800;margin-bottom:8px"></div>
+    <div id="confirmDesc" style="font-size:13px;color:var(--txt3);margin-bottom:18px"></div>
+    <div style="display:flex;gap:10px">
+      <button class="btn btn-ghost" onclick="closeModal('confirmOverlay')" style="margin:0">Отмена</button>
+      <button class="btn btn-danger" id="confirmYes" style="margin:0">Да</button>
+    </div>
+  </div>
+</div>
+
+<div class="toasts" id="toastStack"></div>
+
+<script>
+const firebaseConfig={
+  apiKey: "AIzaSyDok0kztu_cSp5hOxXGWD2HUYao0NdwGp0",
+  authDomain: "kvn-lime.firebaseapp.com",
+  databaseURL: "https://kvn-lime-default-rtdb.firebaseio.com",
+  projectId: "kvn-lime",
+  storageBucket: "kvn-lime.firebasestorage.app",
+  messagingSenderId: "774708656234",
+  appId: "1:774708656234:web:09033abc1d23aaed1bb213"
+};
+firebase.initializeApp(firebaseConfig);
+const auth=firebase.auth();
+const db=firebase.database();
+
+const EMAIL_DOMAIN="@kvnlime.app";
+const INVITE_MEMBER="KVN-LIME164₽@";
+const INVITE_MASTER="KVNSHIKPROLIMEKOMANDIR0273₽&";
+const CATBOX_API="https://catbox.moe/user/api.php";
+const MAX_FILE_MB=200;
+
+let currentUID=null,currentProfile=null,currentRole='guest';
+let users={},usernames={},tracks={},ideas={},shows={},presence={};
+let commentsTarget=null;
+let editingTrackId=null;
+let uploading=false;
+
+function $(id){return document.getElementById(id)}
+function esc(t){const d=document.createElement('div');d.textContent=t==null?'':String(t);return d.innerHTML}
+function escUrl(u){return String(u||'').replace(/"/g,'%22').replace(/</g,'%3C').replace(/>/g,'%3E')}
+
+function toast(msg,icon){
+  const stack=$('toastStack');
+  const el=document.createElement('div');
+  el.className='tst';
+  el.innerHTML='<i class="fas fa-'+(icon||'check')+'"></i><span>'+esc(msg)+'</span><div class="pb"></div>';
+  stack.appendChild(el);
+  setTimeout(()=>{el.style.transition='opacity .3s,transform .3s';el.style.opacity='0';el.style.transform='translateY(-20px)';setTimeout(()=>el.remove(),300)},2500);
+}
+
+function openModal(id){$(id).classList.add('active')}
+function closeModal(id){$(id).classList.remove('active')}
+function showConfirm(title,desc,cb){$('confirmTitle').textContent=title;$('confirmDesc').textContent=desc||'';$('confirmYes').onclick=()=>{closeModal('confirmOverlay');cb()};openModal('confirmOverlay')}
+
+function smartTime(ts){
+  if(!ts)return'';
+  const d=Date.now()-ts;
+  if(d<60000)return'только что';
+  if(d<3600000)return Math.floor(d/60000)+' мин';
+  if(d<86400000)return Math.floor(d/3600000)+' ч';
+  if(d<604800000)return Math.floor(d/86400000)+' дн';
+  return new Date(ts).toLocaleDateString('ru-RU',{day:'2-digit',month:'short'});
+}
+function copyText(t){const s=String(t==null?'':t);if(navigator.clipboard&&window.isSecureContext){navigator.clipboard.writeText(s).then(()=>toast('Скопировано','copy')).catch(()=>legacyCopy(s))}else legacyCopy(s)}
+function legacyCopy(s){const ta=document.createElement('textarea');ta.value=s;ta.style.position='fixed';ta.style.left='-9999px';document.body.appendChild(ta);ta.focus();ta.select();try{document.execCommand('copy');toast('Скопировано','copy')}catch(e){}ta.remove()}
+function isOnline(u){if(!u||u.online!==true)return false;if(u.lastSeen&&(Date.now()-u.lastSeen)>120000)return false;return true}
+function isMember(){return currentRole==='member'||currentRole==='commander'}
+function isCommander(){return currentRole==='commander'}
+
+function extractCatboxUrl(text){
+  const m=String(text||'').match(/https?:\/\/files\.catbox\.moe\/[A-Za-z0-9_.-]+/);
+  return m?m[0]:null;
+}
+function extractDriveId(url){
+  const m=String(url||'').match(/\/d\/([A-Za-z0-9_-]{10,})/);
+  return m?m[1]:null;
+}
+
+function roleLabel(r){
+  if(r==='commander')return{text:'👑 Командир',cls:'bdg-role-commander'};
+  if(r==='member')return{text:'🎭 Участник',cls:'bdg-role-member'};
+  return{text:'👤 Гость',cls:'bdg-role-guest'};
+}
+
+/* ============ AUTH ============ */
+function doAuth(){
+  const nick=$('authNick').value.trim().toLowerCase();
+  const pass=$('authPass').value;
+  const invite=$('authInvite').value.trim();
+  const err=$('authErr');err.style.display='none';
+  if(!nick||!pass){err.textContent='Заполни ник и пароль';err.style.display='block';return}
+  if(!/^[a-z0-9_]{3,20}$/.test(nick)){err.textContent='Ник: 3-20 символов a-z 0-9 _';err.style.display='block';return}
+  if(pass.length<6){err.textContent='Пароль от 6 символов';err.style.display='block';return}
+  const email=nick+EMAIL_DOMAIN;
+  auth.signInWithEmailAndPassword(email,pass).then(()=>{
+    closeModal('authOverlay');toast('Добро пожаловать','hand-wave');
+  }).catch(()=>{
+    // Создание нового аккаунта
+    let role='guest';
+    if(invite===INVITE_MASTER)role='commander';
+    else if(invite===INVITE_MEMBER)role='member';
+    auth.createUserWithEmailAndPassword(email,pass).then(c=>{
+      const uid=c.user.uid;
+      return db.ref('usernames/'+nick).transaction(cur=>{if(cur!==null&&cur!==undefined)return;return uid}).then(r=>{
+        if(!r.committed)return c.user.delete().then(()=>{throw new Error('NICK_TAKEN')});
+        return db.ref('users/'+uid).set({
+          uid,username:nick,nickname:nick,
+          role:role,online:true,createdAt:Date.now(),lastSeen:Date.now(),
+          avatar:'',bio:''
+        });
+      });
+    }).then(()=>{
+      closeModal('authOverlay');
+      toast(role==='commander'?'👑 Командир!':role==='member'?'🎭 Участник!':'👤 Гость — только просмотр','user-plus');
+    }).catch(e=>{
+      if(e.message==='NICK_TAKEN'){err.textContent='Ник занят';err.style.display='block';return}
+      if(e.code==='auth/email-already-in-use'){err.textContent='Ник занят или неверный пароль';err.style.display='block';return}
+      err.textContent='Ошибка: '+(e.message||e.code);err.style.display='block';
+    });
+  });
+}
+
+function logout(){if(currentUID)db.ref('users/'+currentUID+'/online').set(false);auth.signOut().then(()=>toast('Вы вышли','right-from-bracket'))}
+
+function doChangePassword(){
+  const o=$('passOld').value,n=$('passNew').value;const err=$('passErr');err.style.display='none';
+  if(!o||!n){err.textContent='Заполни поля';err.style.display='block';return}
+  if(n.length<6){err.textContent='Новый пароль от 6 символов';err.style.display='block';return}
+  const u=auth.currentUser;if(!u)return;
+  const cred=firebase.auth.EmailAuthProvider.credential(u.email,o);
+  u.reauthenticateWithCredential(cred).then(()=>u.updatePassword(n)).then(()=>{closeModal('changePassOverlay');toast('Пароль изменён','check')}).catch(e=>{err.textContent=e.code==='auth/wrong-password'?'Неверный старый пароль':'Ошибка';err.style.display='block'});
+}
+
+function tryAdmin(){
+  const p=$('adminPass').value;const err=$('adminErr');err.style.display='none';
+  if(p!==INVITE_MASTER){err.textContent='Неверный пароль';err.style.display='block';return}
+  if(!currentUID){err.textContent='Сначала войдите';err.style.display='block';return}
+  db.ref('users/'+currentUID+'/role').set('commander').then(()=>{
+    closeModal('adminOverlay');
+    toast('👑 Теперь вы командир','crown');
+    $('adminPass').value='';
+  });
+}
+
+auth.onAuthStateChanged(user=>{
+  if(user){
+    currentUID=user.uid;
+    db.ref('users/'+currentUID).on('value',s=>{
+      currentProfile=s.val()||{};
+      currentRole=currentProfile.role||'guest';
+      renderProfile();renderUI();
+    });
+    db.ref('users/'+currentUID).update({online:true,lastSeen:Date.now()});
+    db.ref('.info/connected').on('value',snap=>{
+      if(snap.val()===true){
+        db.ref('users/'+currentUID+'/online').onDisconnect().set(false);
+        db.ref('users/'+currentUID+'/lastSeen').onDisconnect().set(firebase.database.ServerValue.TIMESTAMP);
+        db.ref('users/'+currentUID).update({online:true,lastSeen:Date.now()});
+      }
+    });
+    document.addEventListener('visibilitychange',()=>{
+      if(!currentUID)return;
+      if(document.hidden)db.ref('users/'+currentUID).update({online:false,lastSeen:Date.now()});
+      else db.ref('users/'+currentUID).update({online:true,lastSeen:Date.now()});
+    });
+  }else{
+    currentUID=null;currentProfile=null;currentRole='guest';
+    renderProfile();renderUI();
+  }
+});
+
+/* ============ DATA LISTENERS ============ */
+db.ref('users').on('value',s=>{users=s.val()||{};renderTeam();renderHome()});
+db.ref('usernames').on('value',s=>{usernames=s.val()||{}});
+db.ref('tracks').on('value',s=>{tracks=s.val()||{};renderTracks();renderHome()});
+db.ref('ideas').on('value',s=>{ideas=s.val()||{};renderIdeas();renderHome()});
+db.ref('shows').on('value',s=>{shows=s.val()||{};renderShows();renderHome()});
+
+/* ============ TABS ============ */
+function switchTab(tab){
+  document.querySelectorAll('.vw').forEach(v=>v.classList.remove('on'));
+  const vw=$('vw'+tab.charAt(0).toUpperCase()+tab.slice(1));
+  if(vw)vw.classList.add('on');
+  document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('on',t.dataset.tab===tab));
+}
+
+function renderUI(){
+  const member=isMember();
+  const cmd=isCommander();
+  $('fabAddTrack').style.display=member?'flex':'none';
+  $('uploadBlock').style.display=member?'block':'none';
+  $('ideaAddBtn').style.display=member?'block':'none';
+  $('showAddBtn').style.display=cmd?'block':'none';
+  $('commanderBlock').style.display=cmd?'block':'none';
+  // Скрываем поле инвайта после регистрации
+  if(currentUID)$('inviteField').style.display='none';
+  else $('inviteField').style.display='block';
+}
+
+/* ============ HOME ============ */
+function renderHome(){
+  $('hTracks').textContent=Object.keys(tracks).length;
+  $('hIdeas').textContent=Object.keys(ideas).length;
+  $('hMembers').textContent=Object.values(users).filter(u=>u.role!=='guest').length;
+
+  // Ближайшее выступление
+  const arr=Object.entries(shows).map(([id,v])=>({id,...v}))
+    .filter(s=>s.date&&new Date(s.date)>=new Date(Date.now()-86400000))
+    .sort((a,b)=>new Date(a.date)-new Date(b.date));
+  const homeShow=$('homeShow');
+  if(arr.length===0){homeShow.innerHTML='<div class="card" style="text-align:center;color:var(--txt3);font-size:12.5px">Пока не запланировано</div>'}
+  else{
+    const s=arr[0];
+    const d=new Date(s.date);
+    homeShow.innerHTML='<div class="show-row"><div class="show-date"><div class="d">'+d.getDate()+'</div><div class="m">'+d.toLocaleDateString('ru-RU',{month:'short'})+'</div></div><div class="show-info"><div class="sn">'+esc(s.name||'Выступление')+'</div>'+(s.place?'<div class="sp"><i class="fas fa-location-dot"></i> '+esc(s.place)+'</div>':'')+'</div></div>';
+  }
+
+  // Свежие идеи
+  const ideasArr=Object.entries(ideas).map(([id,v])=>({id,...v})).sort((a,b)=>(b.time||0)-(a.time||0)).slice(0,3);
+  const hi=$('homeIdeas');
+  if(ideasArr.length===0){hi.innerHTML='<div class="card" style="text-align:center;color:var(--txt3);font-size:12.5px">Пока нет идей</div>'}
+  else{
+    hi.innerHTML=ideasArr.map(i=>{
+      const a=users[i.author]||{};
+      return '<div class="card" style="cursor:pointer" onclick="switchTab(\'ideas\')"><div class="c-title">💡 '+esc(i.title||'—')+'</div><div class="c-text">'+esc((i.text||'').slice(0,80))+(i.text&&i.text.length>80?'...':'')+'</div><div class="c-meta"><span>'+esc(a.nickname||a.username||'—')+'</span><span>'+smartTime(i.time)+'</span></div></div>';
+    }).join('');
+  }
+
+  // Новые треки
+  const tracksArr=Object.entries(tracks).map(([id,v])=>({id,...v})).sort((a,b)=>(b.time||0)-(a.time||0)).slice(0,3);
+  const ht=$('homeTracks');
+  if(tracksArr.length===0){ht.innerHTML='<div class="card" style="text-align:center;color:var(--txt3);font-size:12.5px">Пока нет треков</div>'}
+  else{
+    ht.innerHTML=tracksArr.map(t=>{
+      const a=users[t.author]||{};
+      return '<div class="card" style="cursor:pointer" onclick="switchTab(\'tracks\')"><div class="c-title">🎵 '+esc(t.name||'—')+'</div><div class="c-meta"><span>'+esc(a.nickname||a.username||'—')+'</span><span>'+smartTime(t.time)+'</span></div></div>';
+    }).join('');
+  }
+}
+
+/* ============ TRACKS ============ */
+function renderTracks(){
+  const box=$('tracksList');
+  $('tracksCount').textContent='Отбивки ('+Object.keys(tracks).length+')';
+  const arr=Object.entries(tracks).map(([id,v])=>({id,...v})).sort((a,b)=>(b.time||0)-(a.time||0));
+  if(arr.length===0){box.innerHTML='<div class="em"><div class="ic">🎵</div><div class="t">Пока нет отбивок</div><div class="d">'+(isMember()?'Загрузи первый трек!':'Войди как участник, чтобы загружать')+'</div></div>';return}
+  box.innerHTML=arr.map(t=>{
+    const a=users[t.author]||{};
+    const isMine=t.author===currentUID;
+    const canDelete=isMine||isCommander();
+    const tags=(t.tags||'').split(',').map(x=>x.trim()).filter(x=>x);
+    const link=t.url||'';
+    const catbox=extractCatboxUrl(link);
+    const driveId=extractDriveId(link);
+    let player='';
+    if(catbox){player='<audio controls preload="none" src="'+escUrl(catbox)+'"></audio>'}
+    else if(driveId){player='<iframe src="https://drive.google.com/file/d/'+driveId+'/preview" style="width:100%;height:60px;border:0;border-radius:10px;margin-top:8px" allow="autoplay"></iframe>'}
+    else if(link){player='<a href="'+escUrl(link)+'" target="_blank" style="display:inline-block;margin-top:8px;color:var(--lime-dark);font-weight:800;font-size:12px;text-decoration:none"><i class="fas fa-external-link-alt"></i> Открыть ссылку</a>'}
+    return '<div class="track-card">'+
+      '<div class="t-header">'+
+        '<div class="t-icon">🎵</div>'+
+        '<div class="t-info">'+
+          '<div class="t-name">'+esc(t.name||'Без названия')+'</div>'+
+          '<div class="t-author">'+esc(a.nickname||a.username||'—')+' · '+smartTime(t.time)+'</div>'+
+          (tags.length?'<div class="t-tags">'+tags.map(x=>'<span class="badge bdg-tag">#'+esc(x)+'</span>').join('')+'</div>':'')+
+        '</div>'+
+      '</div>'+
+      (t.desc?'<div style="font-size:12.5px;color:var(--txt2);line-height:1.45;margin-bottom:6px">'+esc(t.desc)+'</div>':'')+
+      player+
+      (canDelete?'<div class="t-actions"><button class="btn-delete" onclick="deleteTrack(\''+t.id+'\')"><i class="fas fa-trash"></i> Удалить</button></div>':'')+
+    '</div>';
+  }).join('');
+}
+
+function openTrackModal(){
+  if(!isMember()){toast('Только для участников','lock');return}
+  editingTrackId=null;
+  $('trName').value='';$('trTags').value='';$('trDesc').value='';$('trLink').value='';
+  $('uploadStatus').textContent='';
+  $('uploadBar').classList.remove('show');
+  openModal('trackOverlay');
+}
+
+$('trackFileInput').addEventListener('change',async e=>{
+  const file=e.target.files[0];if(!file)return;
+  if(file.size/1024/1024>MAX_FILE_MB){toast('Файл больше '+MAX_FILE_MB+' МБ — используй ссылку','times');e.target.value='';return}
+  uploading=true;
+  $('uploadBar').classList.add('show');
+  $('uploadFill').style.width='0%';
+  $('uploadStatus').innerHTML='<span class="spin"></span> Загрузка на catbox...';
+  const fd=new FormData();
+  fd.append('reqtype','fileupload');
+  fd.append('fileToUpload',file);
+  try{
+    const xhr=new XMLHttpRequest();
+    xhr.upload.onprogress=ev=>{
+      if(ev.lengthComputable){
+        const p=Math.round(ev.loaded/ev.total*100);
+        $('uploadFill').style.width=p+'%';
+        $('uploadStatus').innerHTML='<span class="spin"></span> '+p+'%';
+      }
+    };
+    const url=await new Promise((resolve,reject)=>{
+      xhr.onload=()=>{
+        if(xhr.status===200&&xhr.responseText.startsWith('https://')){
+          resolve(xhr.responseText.trim());
+        }else reject(new Error('catbox error'));
+      };
+      xhr.onerror=()=>reject(new Error('network'));
+      xhr.open('POST',CATBOX_API);
+      xhr.send(fd);
+    });
+    $('trLink').value=url;
+    $('uploadStatus').innerHTML='<i class="fas fa-check-circle" style="color:var(--lime3)"></i> Загружено';
+    $('uploadFill').style.width='100%';
+    toast('Файл загружен','check');
+  }catch(err){
+    $('uploadStatus').innerHTML='<i class="fas fa-times-circle" style="color:var(--red)"></i> Ошибка загрузки';
+    toast('Ошибка загрузки — попробуй ссылку','times');
+  }
+  uploading=false;
+  e.target.value='';
+});
+
+function saveTrack(){
+  if(!isMember()){toast('Только для участников','lock');return}
+  if(uploading){toast('Дождись загрузки','clock');return}
+  const name=$('trName').value.trim();
+  const link=$('trLink').value.trim();
+  if(!name){toast('Введи название','times');return}
+  if(!link){toast('Загрузи файл или вставь ссылку','times');return}
+  const data={
+    name:name,
+    tags:$('trTags').value.trim(),
+    desc:$('trDesc').value.trim(),
+    url:link,
+    author:currentUID,
+    time:Date.now()
+  };
+  db.ref('tracks').push(data).then(()=>{
+    closeModal('trackOverlay');
+    toast('Трек добавлен','music');
+  }).catch(e=>toast('Ошибка: '+e.message,'times'));
+}
+
+function deleteTrack(id){
+  const t=tracks[id];if(!t)return;
+  if(t.author!==currentUID&&!isCommander()){toast('Только свои или командир','lock');return}
+  showConfirm('Удалить трек?','Файл на catbox останется, но из библиотеки исчезнет.',()=>{
+    db.ref('tracks/'+id).remove().then(()=>toast('Удалено','trash'));
+  });
+}
+
+function clearAllTracks(){
+  if(!isCommander()){toast('Только командир','lock');return}
+  showConfirm('Очистить ВСЕ треки?','Удалятся все отбивки команды. Файлы на catbox останутся.',()=>{
+    db.ref('tracks').remove().then(()=>toast('Все треки удалены','broom'));
+  });
+}
+
+/* ============ IDEAS ============ */
+function renderIdeas(){
+  const box=$('ideasList');
+  const arr=Object.entries(ideas).map(([id,v])=>({id,...v})).sort((a,b)=>(b.time||0)-(a.time||0));
+  if(arr.length===0){box.innerHTML='<div class="em"><div class="ic">💡</div><div class="t">Пока нет идей</div><div class="d">'+(isMember()?'Добавь первую!':'Войди участником, чтобы добавить')+'</div></div>';return}
+  box.innerHTML=arr.map(i=>{
+    const a=users[i.author]||{};
+    const likes=i.likes||{};
+    const likeCount=Object.keys(likes).length;
+    const liked=likes[currentUID];
+    const commentCount=Object.keys(i.comments||{}).length;
+    const canDelete=i.author===currentUID||isCommander();
+    return '<div class="card">'+
+      '<div class="c-title">💡 '+esc(i.title||'—')+'</div>'+
+      '<div class="c-text">'+esc(i.text||'')+'</div>'+
+      '<div class="c-meta"><span><i class="fas fa-user"></i> '+esc(a.nickname||a.username||'—')+'</span><span><i class="fas fa-clock"></i> '+smartTime(i.time)+'</span></div>'+
+      '<div class="c-actions">'+
+        '<button class="btn-like '+(liked?'on':'')+'" onclick="toggleLike(\''+i.id+'\')"><i class="fas fa-heart"></i> '+likeCount+'</button>'+
+        '<button class="btn-comment" onclick="openComments(\''+i.id+'\')"><i class="fas fa-comment"></i> '+commentCount+'</button>'+
+        (canDelete?'<button class="btn-delete" onclick="deleteIdea(\''+i.id+'\')"><i class="fas fa-trash"></i></button>':'')+
+      '</div>'+
+    '</div>';
+  }).join('');
+}
+
+function openIdeaModal(){
+  if(!isMember()){toast('Только для участников','lock');return}
+  $('idTitle').value='';$('idText').value='';
+  openModal('ideaOverlay');
+}
+function saveIdea(){
+  if(!isMember())return;
+  const title=$('idTitle').value.trim();
+  const text=$('idText').value.trim();
+  if(!title){toast('Введи заголовок','times');return}
+  db.ref('ideas').push({title,text,author:currentUID,time:Date.now(),likes:{},comments:{}}).then(()=>{closeModal('ideaOverlay');toast('Идея добавлена','lightbulb')});
+}
+function toggleLike(id){
+  if(!currentUID){toast('Войдите','lock');return}
+  if(!isMember()){toast('Только участники','lock');return}
+  const r=db.ref('ideas/'+id+'/likes/'+currentUID);
+  r.once('value').then(s=>{if(s.exists())r.remove();else r.set(true)});
+}
+function deleteIdea(id){
+  const i=ideas[id];if(!i)return;
+  if(i.author!==currentUID&&!isCommander()){toast('Только свои или командир','lock');return}
+  showConfirm('Удалить идею?','',()=>{db.ref('ideas/'+id).remove().then(()=>toast('Удалено','trash'))});
+}
+
+function openComments(id){
+  commentsTarget=id;
+  renderComments();
+  $('commentInput').value='';
+  openModal('commentsOverlay');
+}
+function renderComments(){
+  const i=ideas[commentsTarget];if(!i){$('commentsList').innerHTML='';return}
+  const arr=Object.entries(i.comments||{}).map(([k,v])=>({id:k,...v})).sort((a,b)=>a.time-b.time);
+  if(arr.length===0){$('commentsList').innerHTML='<div style="text-align:center;color:var(--txt3);font-size:12px;padding:14px">Комментариев нет</div>';return}
+  $('commentsList').innerHTML=arr.map(c=>{
+    const a=users[c.author]||{};
+    const av=a.avatar?'<img src="'+escUrl(a.avatar)+'">':esc((a.nickname||'?').charAt(0).toUpperCase());
+    return '<div class="comment"><div class="cav">'+av+'</div><div class="cbody"><div class="cname">'+esc(a.nickname||a.username||'—')+'</div><div class="ctext">'+esc(c.text||'')+'</div><div class="ctime">'+smartTime(c.time)+'</div></div></div>';
+  }).join('');
+}
+function sendComment(){
+  if(!currentUID){toast('Войдите','lock');return}
+  if(!isMember()){toast('Только участники','lock');return}
+  const t=$('commentInput').value.trim();if(!t)return;
+  if(!commentsTarget)return;
+  db.ref('ideas/'+commentsTarget+'/comments').push({author:currentUID,text:t,time:Date.now()}).then(()=>{
+    $('commentInput').value='';
+    setTimeout(renderComments,150);
+  });
+}
+
+/* ============ TEAM ============ */
+function renderTeam(){
+  const box=$('teamList');
+  const arr=Object.entries(users).map(([id,v])=>({id,...v}))
+    .filter(u=>u.role==='member'||u.role==='commander')
+    .sort((a,b)=>{
+      const ao=isOnline(a)?1:0,bo=isOnline(b)?1:0;
+      if(ao!==bo)return bo-ao;
+      return (b.createdAt||0)-(a.createdAt||0);
+    });
+  if(arr.length===0){box.innerHTML='<div class="em"><div class="ic">👥</div><div class="t">Пока никого</div><div class="d">Пригласи команду инвайт-кодом</div></div>';return}
+  box.innerHTML=arr.map(u=>{
+    const on=isOnline(u);
+    const av=u.avatar?'<img src="'+escUrl(u.avatar)+'">':esc((u.nickname||'?').charAt(0).toUpperCase());
+    const role=roleLabel(u.role);
+    return '<div class="mem-row"><div class="mav">'+av+(on?'<span class="dot"></span>':'')+'</div><div class="minf"><div class="mn">'+esc(u.nickname||u.username||'—')+'</div><div class="ms">'+(on?'<span style="color:#22c55e">● в сети</span>':(u.lastSeen?'был(а) '+smartTime(u.lastSeen):''))+'</div></div><div class="mbdg"><span class="badge '+role.cls+'">'+role.text+'</span></div></div>';
+  }).join('');
+}
+
+/* ============ SHOWS ============ */
+function renderShows(){
+  const box=$('showsList');
+  const arr=Object.entries(shows).map(([id,v])=>({id,...v})).sort((a,b)=>new Date(a.date||0)-new Date(b.date||0));
+  if(arr.length===0){box.innerHTML='<div class="em"><div class="ic">📅</div><div class="t">Выступлений пока нет</div><div class="d">'+(isCommander()?'Добавь первое!':'Командир может добавить')+'</div></div>';return}
+  box.innerHTML=arr.map(s=>{
+    const d=new Date(s.date||Date.now());
+    const past=d<new Date(Date.now()-86400000);
+    return '<div class="show-row" style="'+(past?'opacity:.55':'')+'"><div class="show-date"><div class="d">'+d.getDate()+'</div><div class="m">'+d.toLocaleDateString('ru-RU',{month:'short'})+'</div></div><div class="show-info"><div class="sn">'+esc(s.name||'Выступление')+'</div>'+(s.place?'<div class="sp"><i class="fas fa-location-dot"></i> '+esc(s.place)+'</div>':'')+(s.desc?'<div class="st">'+esc(s.desc)+'</div>':'')+'</div>'+(isCommander()?'<button class="btn-delete" style="padding:8px;border-radius:9px" onclick="deleteShow(\''+s.id+'\')"><i class="fas fa-trash"></i></button>':'')+'</div>';
+  }).join('');
+}
+function openShowModal(){
+  if(!isCommander()){toast('Только командир','lock');return}
+  $('shName').value='';$('shDate').value='';$('shPlace').value='';$('shDesc').value='';
+  openModal('showOverlay');
+}
+function saveShow(){
+  if(!isCommander())return;
+  const name=$('shName').value.trim();
+  if(!name){toast('Введи название','times');return}
+  const date=$('shDate').value||new Date().toISOString().slice(0,10);
+  db.ref('shows').push({name,date,place:$('shPlace').value.trim(),desc:$('shDesc').value.trim(),author:currentUID,time:Date.now()}).then(()=>{closeModal('showOverlay');toast('Выступление добавлено','calendar')});
+}
+function deleteShow(id){if(!isCommander())return;showConfirm('Удалить?','',()=>{db.ref('shows/'+id).remove().then(()=>toast('Удалено','trash'))})}
+
+/* ============ PROFILE ============ */
+function renderProfile(){
+  if(!currentUID){$('profileNotAuth').style.display='block';$('profileAuth').style.display='none';return}
+  $('profileNotAuth').style.display='none';$('profileAuth').style.display='block';
+  const p=currentProfile||{};
+  $('pfName').textContent=p.nickname||p.username||'—';
+  $('pfHandle').textContent='@'+(p.username||'—');
+  $('pfBio').textContent=p.bio||'Описание не задано';
+  $('pfNickSub').textContent='@'+(p.username||'—');
+  const letter=(p.nickname||p.username||'?').charAt(0).toUpperCase();
+  if(p.avatar){$('pfAvatar').innerHTML='<img src="'+escUrl(p.avatar)+'">'}
+  else{$('pfAvatar').innerHTML='<span>'+letter+'</span>'}
+  const role=roleLabel(currentRole);
+  $('pfRoleBadge').innerHTML='<span class="badge '+role.cls+'">'+role.text+'</span>';
+}
+function copyMyNick(){if(currentProfile)copyText('@'+(currentProfile.username||''))}
+function openEditProfile(){
+  if(!currentUID)return;
+  const p=currentProfile||{};
+  $('edName').value=p.nickname||p.username||'';
+  $('edBio').value=p.bio||'';
+  $('edAvatar').value=p.avatar||'';
+  openModal('editProfileOverlay');
+}
+function saveProfile(){
+  if(!currentUID)return;
+  db.ref('users/'+currentUID).update({
+    nickname:$('edName').value.trim()||currentProfile.nickname,
+    bio:$('edBio').value.trim(),
+    avatar:$('edAvatar').value.trim()
+  }).then(()=>{closeModal('editProfileOverlay');toast('Сохранено','check')});
+}
+$('avatarFileInput').addEventListener('change',e=>{
+  const f=e.target.files[0];if(!f)return;
+  const fd=new FormData();fd.append('image',f);fd.append('key','e95d7591bce7e9d9ab12197fd5eb0b26');
+  toast('Загрузка аватара...','spinner');
+  fetch('https://api.imgbb.com/1/upload',{method:'POST',body:fd}).then(r=>r.json()).then(d=>{
+    if(!d.success)throw new Error();
+    if(currentUID)db.ref('users/'+currentUID+'/avatar').set(d.data.url);
+    toast('Аватар обновлён','check');
+  }).catch(()=>toast('Ошибка загрузки','times'));
+  e.target.value='';
+});
+function openInviteModal(){openModal('inviteOverlay')}
+
+/* ============ INIT ============ */
+switchTab('home');
+renderUI();
+console.log('🍋 КВН ЛАЙМ v1.0 загружен');
+</script>
+</body>
+</html>
